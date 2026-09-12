@@ -1,0 +1,137 @@
+{
+  "name": "Sheet to Gmail Automation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -64
+      ],
+      "id": "6d52844e-b725-441b-a8a2-356028757790",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1QaoEQP8VA0sPD4sRM3rLTw6fv7bxbzpMUsQvxhIeRBc",
+          "mode": "list",
+          "cachedResultName": "Student_raw_data ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaoEQP8VA0sPD4sRM3rLTw6fv7bxbzpMUsQvxhIeRBc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1706396054,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaoEQP8VA0sPD4sRM3rLTw6fv7bxbzpMUsQvxhIeRBc/edit#gid=1706396054"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "0a5a93a3-75ab-436d-b294-a57cbf647f2b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5o5l57IrrWtnTLv3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "= {{ $json.toEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.messageBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "ea6b7d37-5ff0-4509-a62d-b1bc3c3575f0",
+      "name": "Send a message",
+      "webhookId": "faff346e-d114-4860-9f0d-0420dcd5b34b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2epLetg3o3mbSsJv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const row = item.json;\n\n  // Extract student details with fallbacks\n  const name = row['Name'] || 'Student';\n  const email = row['Email'] || '';\n  const course = row['Course'] || 'N/A';\n  const status = row['Fee_Paid_status'] || 'Pending';\n\n  // Build the message body matching your exact structure\n  const body = `Hi,\n\nHere is the latest data from the sheet:\n  Name: ${name}\n  Course: ${course}\n  Fee_Paid_Status: ${status}\n\nRegards,\nYour Automation Bot`;\n\n  results.push({\n    json: {\n      toEmail: email,\n      name: name,\n      course: course,\n      Fee_Paid_status: status,\n      subject: 'Data Summary from Google Sheet',\n      messageBody: body\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -64
+      ],
+      "id": "7ec377cb-3a7b-4d2e-bd3e-3eda7c8869d6",
+      "name": "structed Message"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "structed Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "structed Message": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "32b14a80-ecfb-49d7-a62e-17e14c9e3d43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "81f7d6750e28aa02deb49d8d565deea9738ae699092ea93deaf34cbe2cf1802e"
+  },
+  "nodeGroups": [],
+  "id": "abWYw7AHaBwByzjN",
+  "tags": []
+}
